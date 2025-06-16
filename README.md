@@ -4,11 +4,13 @@ Like Tinder, but for deciding what to watch! A React Native app built with Expo 
 
 ## 🎯 Features
 
-- **Session-based swiping**: Create or join sessions with friends using simple codes
+- **Pass-the-phone gameplay**: Local multiplayer experience - no accounts needed!
 - **Tinder-style interface**: Swipe left (nope) or right (like) on shows and movies
 - **Real-time consensus**: When everyone swipes right on the same title, it's a match!
+- **Real movie/TV data**: Uses The Movie Database (TMDB) API for current content
 - **Beautiful animations**: Smooth swipe animations and celebratory match reveals
-- **Randomized queues**: Each user gets a different random order of content
+- **Session summaries**: Post-game stats and insights
+- **Responsive design**: Optimized for all phone sizes
 - **Cross-platform**: Works on iOS, Android, and web via Expo
 
 ## 🚀 Getting Started
@@ -28,74 +30,94 @@ Like Tinder, but for deciding what to watch! A React Native app built with Expo 
    npm install
    ```
 
-3. Start the development server:
+3. **(Optional) Set up real movie data:**
+
+   - See [TMDB_SETUP.md](TMDB_SETUP.md) for 5-minute setup
+   - App works perfectly with mock data if you skip this step
+
+4. Start the development server:
 
    ```bash
    npm start
    ```
 
-4. Scan the QR code with Expo Go (Android) or Camera app (iOS)
+5. Scan the QR code with Expo Go (Android) or Camera app (iOS)
 
 ## 🎮 How to Use
 
-1. **Create or Join**: Start a new session or join with a 6-character code
-2. **Share**: Share your session code with friends
+1. **Add participants**: Enter names of everyone who will be swiping
+2. **Start session**: Pass the phone around for each person to swipe
 3. **Swipe**: Swipe left (👎) on shows you don't want, right (👍) on shows you'd watch
-4. **Match**: When everyone likes the same show, you get a celebration and reveal!
-5. **Enjoy**: Time to watch your matched content! 🍿
+4. **Match or Try Again**: When everyone likes the same show, celebrate! If not, start fresh.
+5. **Session summary**: View stats and start a new round
+6. **Enjoy**: Time to watch your matched content! 🍿
 
 ## 🏗️ Tech Stack
 
 - **Framework**: React Native with Expo
 - **Language**: TypeScript
 - **State Management**: Zustand
+- **API**: The Movie Database (TMDB) with fallback mock data
 - **Animations**: React Native Reanimated
 - **Navigation**: Expo Router
 - **Gestures**: React Native Gesture Handler
-- **Backend Ready**: Set up for Supabase integration
+- **HTTP Client**: Axios for API calls
 
 ## 📱 App Structure
 
 ```
 app/
 ├── (tabs)/
-│   ├── index.tsx          # Main swipe interface
+│   ├── index.tsx          # Main app interface
 │   ├── explore.tsx        # How it works guide
 │   └── _layout.tsx        # Tab navigation
 ├── _layout.tsx            # Root layout
 components/
 ├── SwipeCard.tsx          # Individual swipeable cards
-├── SwipeDeck.tsx          # Stack of cards
+├── SwipeDeck.tsx          # Stack of cards with gestures
 ├── MatchAnimation.tsx     # Success animation
-├── SessionCodeInput.tsx   # Session creation/joining
-├── SessionDisplay.tsx     # Session info header
+├── SessionSetup.tsx       # Add participants interface
+├── SessionSummary.tsx     # Post-session stats
+├── TurnIndicator.tsx      # Shows whose turn it is
 └── ActionButtons.tsx      # Like/Nope buttons
 store/
 └── appStore.ts           # Zustand state management
 types/
 └── index.ts              # TypeScript definitions
 data/
-└── mockData.ts           # Sample movie/show data
+└── mockData.ts           # Mock data with API integration
+services/
+└── tmdbApi.ts            # TMDB API service
+config/
+└── tmdb.ts               # API configuration
 ```
 
-## 🔮 Future Features
+## 🔮 Current Status
 
-- **Real-time sync**: Full Supabase integration for live updates
-- **TMDB Integration**: Real movie/show data and posters
-- **Genre filtering**: Filter by genre, runtime, rating
-- **Streaming service filters**: Filter by Netflix, Disney+, etc.
-- **Session stats**: Fun post-match statistics
-- **Profile system**: Save preferences and history
-- **Push notifications**: Notify when sessions have matches
+✅ **Completed:**
+
+- Full pass-the-phone local multiplayer
+- TMDB API integration with fallback
+- Responsive design for all phone sizes
+- Match detection and animations
+- Session summary with stats
+- Accessibility support
+
+🚧 **Future Features:**
+
+- Real-time multiplayer (WebSocket/Supabase)
+- Genre/service filtering
+- User profiles and history
+- Push notifications
+- Advanced matching algorithms
 
 ## 🧪 Demo Mode
 
-Currently runs in demo mode with:
+The app can run in two modes:
 
-- Mock movie/show data with placeholder images
-- Simulated real-time behavior
-- Local state management
-- Match triggers after 2+ right swipes (adjustable)
+- **With TMDB API**: Real movie/TV data with posters and details
+- **Mock Data Mode**: Sample content with placeholder images
+- Automatically falls back to mock data if API is unavailable
 
 ## 📄 License
 

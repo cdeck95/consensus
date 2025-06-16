@@ -1,6 +1,12 @@
 import { MediaTitle } from "@/types";
-import React, { useEffect } from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -20,15 +26,22 @@ const CARD_PADDING = Math.max(20, SCREEN_WIDTH * 0.05);
 interface MatchAnimationProps {
   matchedTitle: MediaTitle;
   onAnimationComplete: () => void;
+  onKeepGoing?: () => void;
+  onGoBack?: () => void; // New prop for going back
 }
 
 export const MatchAnimation: React.FC<MatchAnimationProps> = ({
   matchedTitle,
   onAnimationComplete,
+  onKeepGoing,
+  onGoBack,
 }) => {
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
   const confettiScale = useSharedValue(0);
+  const [countdown, setCountdown] = useState(5);
+  const [showButtons, setShowButtons] = useState(false);
+  const [timerActive, setTimerActive] = useState(true);
 
   useEffect(() => {
     // Start animation sequence
@@ -41,11 +54,40 @@ export const MatchAnimation: React.FC<MatchAnimationProps> = ({
     confettiScale.value = withDelay(
       300,
       withSpring(1, { damping: 8 }, () => {
-        // Animation complete callback
-        runOnJS(onAnimationComplete)();
+        // Show buttons after animation completes
+        runOnJS(setShowButtons)(true);
       })
     );
-  }, [confettiScale, onAnimationComplete, opacity, scale]);
+  }, [confettiScale, opacity, scale]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!showButtons || !timerActive) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // Call onAnimationComplete after the countdown reaches 0
+          setTimeout(() => {
+            if (timerActive) {
+              onAnimationComplete();
+            }
+          }, 1000);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [showButtons, timerActive, onAnimationComplete]);
+
+  // Stop timer when user interacts
+  const handleUserAction = (action: () => void) => {
+    setTimerActive(false);
+    action();
+  };
 
   const containerStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -90,6 +132,45 @@ export const MatchAnimation: React.FC<MatchAnimationProps> = ({
         <Text style={styles.celebrationText}>
           Everyone wants to watch this! 🍿
         </Text>
+
+        {/* Action buttons - only show if onKeepGoing is provided */}
+        {onKeepGoing && showButtons && (
+          <View style={styles.actionButtons}>
+            <Text style={styles.countdownText}>
+              {timerActive
+                ? `Auto-continue in ${countdown}s`
+                : "Choose an option:"}
+            </Text>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.keepGoingButton}
+                onPress={() => handleUserAction(onKeepGoing)}
+              >
+                <Text style={styles.keepGoingButtonText}>Keep Looking 🔍</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.finishButton}
+                onPress={() => handleUserAction(onAnimationComplete)}
+              >
+                <Text style={styles.finishButtonText}>We&apos;re Done! ✅</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Go Back button - only show if onGoBack is provided */}
+            {onGoBack && (
+              <TouchableOpacity
+                style={styles.goBackButton}
+                onPress={() => handleUserAction(onGoBack)}
+              >
+                <Text style={styles.goBackButtonText}>
+                  ← Go Back & Continue
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </Animated.View>
     </Animated.View>
   );
@@ -184,5 +265,65 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "600",
     lineHeight: Math.max(20, SCREEN_WIDTH * 0.05),
+  },
+  actionButtons: {
+    marginTop: Math.max(20, SCREEN_HEIGHT * 0.025),
+    width: "100%",
+    alignItems: "center",
+  },
+  countdownText: {
+    fontSize: Math.max(12, Math.min(16, SCREEN_WIDTH * 0.035)),
+    color: "#999",
+    textAlign: "center",
+    marginBottom: Math.max(12, SCREEN_HEIGHT * 0.015),
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: Math.max(12, SCREEN_WIDTH * 0.03),
+    width: "100%",
+    justifyContent: "center",
+  },
+  keepGoingButton: {
+    backgroundColor: "#4ECDC4",
+    paddingVertical: Math.max(10, SCREEN_HEIGHT * 0.012),
+    paddingHorizontal: Math.max(16, SCREEN_WIDTH * 0.04),
+    borderRadius: 25,
+    flex: 1,
+    maxWidth: 140,
+  },
+  keepGoingButtonText: {
+    color: "#fff",
+    fontSize: Math.max(12, Math.min(16, SCREEN_WIDTH * 0.035)),
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  finishButton: {
+    backgroundColor: "#FF6B6B",
+    paddingVertical: Math.max(10, SCREEN_HEIGHT * 0.012),
+    paddingHorizontal: Math.max(16, SCREEN_WIDTH * 0.04),
+    borderRadius: 25,
+    flex: 1,
+    maxWidth: 140,
+  },
+  finishButtonText: {
+    color: "#fff",
+    fontSize: Math.max(12, Math.min(16, SCREEN_WIDTH * 0.035)),
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  goBackButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    paddingVertical: Math.max(8, SCREEN_HEIGHT * 0.01),
+    paddingHorizontal: Math.max(20, SCREEN_WIDTH * 0.05),
+    borderRadius: 20,
+    marginTop: Math.max(12, SCREEN_HEIGHT * 0.015),
+  },
+  goBackButtonText: {
+    color: "#666",
+    fontSize: Math.max(11, Math.min(14, SCREEN_WIDTH * 0.032)),
+    fontWeight: "500",
+    textAlign: "center",
   },
 });

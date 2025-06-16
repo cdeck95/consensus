@@ -1,5 +1,6 @@
+import { isApiKeyConfigured } from "@/config/tmdb";
+import { getMixedPopularContent } from "@/services/tmdbApi";
 import { MediaTitle } from "@/types";
-import { getMixedPopularContent, isApiKeyConfigured } from "@/services/tmdbApi";
 
 export const mockMediaTitles: MediaTitle[] = [
   {
@@ -113,6 +114,28 @@ export const mockMediaTitles: MediaTitle[] = [
   },
 ];
 
+// Seeded random shuffle for consistent ordering per session
+function seededShuffle<T>(array: T[], seed: string): T[] {
+  const shuffled = [...array];
+  let hash = 0;
+
+  // Create a simple hash from the seed
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  // Use the hash as a seed for pseudo-random shuffling
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    hash = (hash * 1103515245 + 12345) & 0x7fffffff; // Linear congruential generator
+    const j = hash % (i + 1);
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+}
+
 export function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -123,26 +146,34 @@ export function shuffleArray<T>(array: T[]): T[] {
 }
 
 // Get random media queue with API data if available, fallback to mock data
-export async function getRandomMediaQueue(): Promise<MediaTitle[]> {
+export async function getRandomMediaQueue(
+  sessionSeed?: string
+): Promise<MediaTitle[]> {
   try {
     // Check if API key is configured
     if (isApiKeyConfigured()) {
-      console.log('Using TMDB API for media data...');
-      const apiData = await getMixedPopularContent();
-      
+      console.log("Using TMDB API for media data...");
+      const apiData = await getMixedPopularContent(sessionSeed);
+
       if (apiData.length > 0) {
-        return shuffleArray(apiData);
+        return apiData; // Already shuffled in getMixedPopularContent
       }
-      
-      console.log('API returned no data, falling back to mock data');
+
+      console.log("API returned no data, falling back to mock data");
     } else {
-      console.log('TMDB API key not configured, using mock data. Get your free API key at https://www.themoviedb.org/settings/api');
+      console.log(
+        "TMDB API key not configured, using mock data. Get your free API key at https://www.themoviedb.org/settings/api"
+      );
     }
   } catch (error) {
-    console.error('Error fetching from API, falling back to mock data:', error);
+    console.error("Error fetching from API, falling back to mock data:", error);
   }
-  
-  // Fallback to mock data
+
+  // Fallback to mock data with seeded shuffle if provided
+  if (sessionSeed) {
+    return seededShuffle(mockMediaTitles, sessionSeed);
+  }
+
   return shuffleArray(mockMediaTitles);
 }
 

@@ -28,6 +28,8 @@ export default function HomeScreen() {
     getCurrentParticipant,
     startNewSessionWithSameParticipants,
     startNewSessionWithNewParticipants,
+    continueAfterMatch,
+    undoMatchAndContinue,
   } = useAppStore();
 
   const handleSwipe = async (mediaId: string, direction: "left" | "right") => {
@@ -68,6 +70,8 @@ export default function HomeScreen() {
         <MatchAnimation
           matchedTitle={currentSession.matched_title}
           onAnimationComplete={handleMatchAnimationComplete}
+          onKeepGoing={continueAfterMatch}
+          onGoBack={undoMatchAndContinue}
         />
       </SafeAreaView>
     );

@@ -1,5 +1,5 @@
-import { MediaTitle, Participant, UserSwipe } from "@/types";
 import { useAppStore } from "@/store/appStore";
+import { MediaTitle, Participant, UserSwipe } from "@/types";
 import React from "react";
 import {
   Dimensions,
@@ -36,7 +36,9 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({
   const { getMediaTitleById } = useAppStore();
   // Calculate session statistics
   const totalSwipes = swipes.length;
-  const rightSwipes = swipes.filter((s) => s.swipe_direction === "right").length;
+  const rightSwipes = swipes.filter(
+    (s) => s.swipe_direction === "right"
+  ).length;
   const leftSwipes = swipes.filter((s) => s.swipe_direction === "left").length;
 
   // Calculate participant stats
@@ -56,7 +58,10 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({
       totalSwipes: participantSwipes.length,
       likes,
       dislikes,
-      likePercentage: participantSwipes.length > 0 ? (likes / participantSwipes.length) * 100 : 0,
+      likePercentage:
+        participantSwipes.length > 0
+          ? (likes / participantSwipes.length) * 100
+          : 0,
     };
   });
 
@@ -85,7 +90,8 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({
           <View style={styles.matchCard}>
             <Text style={styles.showTitle}>{matchedTitle.title}</Text>
             <Text style={styles.showDetails}>
-              {matchedTitle.genre} • {matchedTitle.runtime}min • ⭐ {matchedTitle.rating}
+              {matchedTitle.genre} • {matchedTitle.runtime}min • ⭐{" "}
+              {matchedTitle.rating}
             </Text>
             {matchedTitle.year && (
               <Text style={styles.showYear}>{matchedTitle.year}</Text>
@@ -95,8 +101,8 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({
       ) : (
         <View style={styles.noMatchSection}>
           <Text style={styles.noMatchText}>
-            Unfortunately, no show got everyone&apos;s approval this time. 
-            But don&apos;t worry - you can try again with a fresh set of shows!
+            Unfortunately, no show got everyone&apos;s approval this time. But
+            don&apos;t worry - you can try again with a fresh set of shows!
           </Text>
         </View>
       )}
@@ -149,7 +155,7 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({
               <View key={mediaId} style={styles.popularItem}>
                 <Text style={styles.popularRank}>#{index + 1}</Text>
                 <Text style={styles.popularTitle}>
-                  {media?.title || 'Unknown Title'}
+                  {media?.title || "Unknown Title"}
                 </Text>
                 <Text style={styles.popularCount}>{count} likes</Text>
               </View>
@@ -161,13 +167,17 @@ export const SessionSummary: React.FC<SessionSummaryProps> = ({
       <View style={styles.actionsSection}>
         <TouchableOpacity
           style={styles.primaryButton}
-          onPress={onSameParticipants}
+          onPress={async () => {
+            try {
+              await onSameParticipants();
+            } catch (error) {
+              console.error("Error starting new session:", error);
+            }
+          }}
           accessibilityLabel="Play again with same people"
           accessibilityHint="Start a new session with the same participants"
         >
-          <Text style={styles.primaryButtonText}>
-            Play Again (Same Group)
-          </Text>
+          <Text style={styles.primaryButtonText}>Play Again (Same Group)</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -204,7 +214,9 @@ const styles = StyleSheet.create({
     paddingBottom: Math.max(40, SCREEN_HEIGHT * 0.05),
   },
   title: {
-    fontSize: isSmallScreen ? 24 : Math.max(24, Math.min(32, SCREEN_WIDTH * 0.07)),
+    fontSize: isSmallScreen
+      ? 24
+      : Math.max(24, Math.min(32, SCREEN_WIDTH * 0.07)),
     fontWeight: "bold",
     color: "#FF6B6B",
     textAlign: "center",

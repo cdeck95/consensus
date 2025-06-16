@@ -23,6 +23,7 @@ export interface Session {
   participants: Participant[];
   currentParticipantIndex: number;
   totalParticipants: number;
+  participantQueues?: Record<string, MediaTitle[]>; // Per-participant shuffled queues
 }
 
 export interface UserSwipe {

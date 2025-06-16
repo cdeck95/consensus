@@ -1,5 +1,5 @@
 import { MediaTitle } from "@/types";
-import React from "react";
+import React, { useEffect } from "react";
 import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
 import {
   PanGestureHandler,
@@ -37,7 +37,13 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const scale = useSharedValue(isTopCard ? 1 : 0.95);
-  const opacity = useSharedValue(isTopCard ? 1 : 0.8);
+  const opacity = useSharedValue(isTopCard ? 1 : 0.3);
+
+  // Update opacity and scale when isTopCard changes
+  useEffect(() => {
+    opacity.value = withSpring(isTopCard ? 1 : 0.3);
+    scale.value = withSpring(isTopCard ? 1 : 0.95);
+  }, [isTopCard, opacity, scale]);
 
   const gestureHandler =
     useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({

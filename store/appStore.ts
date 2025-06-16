@@ -1,4 +1,4 @@
-import { getRandomMediaQueue, getRandomMediaQueueSync } from "@/data/mockData";
+import { getRandomMediaQueue } from "@/data/mockData";
 import { AppState, MediaTitle, Participant, Session, UserSwipe } from "@/types";
 import { create } from "zustand";
 
@@ -17,6 +17,8 @@ interface AppStore extends AppState {
   startNewSessionWithSameParticipants: () => Promise<void>;
   startNewSessionWithNewParticipants: () => void;
   showSessionSummary: () => void;
+  continueAfterMatch: () => void;
+  undoMatchAndContinue: () => void;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -90,17 +92,36 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const { currentSession } = get();
     if (!currentSession || currentSession.participants.length < 2) return;
 
+    // Create base session seed
+    const baseSessionSeed = currentSession.id;
+
+    // Fetch base media queue
+    const baseMediaQueue = await getRandomMediaQueue(baseSessionSeed);
+
+    // Create per-participant shuffled queues using participant-specific seeds
+    const participantQueues: Record<string, MediaTitle[]> = {};
+    for (const participant of currentSession.participants) {
+      const participantSeed = `${baseSessionSeed}_${participant.id}`;
+      participantQueues[participant.id] = await getRandomMediaQueue(
+        participantSeed
+      );
+    }
+
     const updatedSession: Session = {
       ...currentSession,
       status: "swiping",
+      participantQueues,
     };
 
-    // Fetch media queue asynchronously
-    const mediaQueue = await getRandomMediaQueue();
+    // Set the current participant's queue as the main queue
+    const currentParticipant =
+      currentSession.participants[currentSession.currentParticipantIndex];
+    const currentQueue =
+      participantQueues[currentParticipant.id] || baseMediaQueue;
 
     set({
       currentSession: updatedSession,
-      mediaQueue,
+      mediaQueue: currentQueue,
       currentMediaIndex: 0,
       userSwipes: [],
       isMatched: false,
@@ -143,7 +164,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   nextParticipant: () => {
-    const { currentSession } = get();
+    const { currentSession, mediaQueue } = get();
     if (!currentSession) return;
 
     // Mark current participant as completed
@@ -155,11 +176,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     // Check if all participants have completed their swipes
     const allCompleted = updatedParticipants.every((p) => p.hasCompleted);
-    
+
     if (allCompleted) {
       // All participants have completed - check for final match
       get().checkForMatch();
-      
+
       // If no match was found, show summary
       setTimeout(() => {
         const { isMatched } = get();
@@ -181,9 +202,15 @@ export const useAppStore = create<AppStore>((set, get) => ({
       currentParticipantIndex: nextIndex,
     };
 
+    // Switch to the next participant's queue
+    const nextParticipant = updatedParticipants[nextIndex];
+    const nextQueue =
+      currentSession.participantQueues?.[nextParticipant.id] || mediaQueue;
+
     set({
       currentSession: updatedSession,
       currentMediaIndex: 0, // Reset to beginning for next person
+      mediaQueue: nextQueue, // Switch to next participant's shuffled queue
     });
   },
 
@@ -217,7 +244,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
           currentSession: updatedSession,
           isMatched: true,
         });
-        
+
         // Show summary after match animation
         setTimeout(() => {
           set({ showSummary: true });
@@ -235,7 +262,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   getMediaTitleById: (id: string) => {
     const { mediaQueue } = get();
-    return mediaQueue.find(media => media.id === id);
+    return mediaQueue.find((media) => media.id === id);
   },
 
   resetApp: () => {
@@ -259,22 +286,37 @@ export const useAppStore = create<AppStore>((set, get) => ({
       hasCompleted: false,
     }));
 
+    // Create new session with new ID for fresh seed
+    const newSessionId = `session_${Date.now()}`;
+    const baseSessionSeed = newSessionId;
+
+    // Create per-participant shuffled queues with new seeds
+    const participantQueues: Record<string, MediaTitle[]> = {};
+    for (const participant of resetParticipants) {
+      const participantSeed = `${baseSessionSeed}_${participant.id}`;
+      participantQueues[participant.id] = await getRandomMediaQueue(
+        participantSeed
+      );
+    }
+
     const newSession: Session = {
       ...currentSession,
-      id: `session_${Date.now()}`,
+      id: newSessionId,
       created_at: new Date().toISOString(),
       status: "swiping",
       participants: resetParticipants,
       currentParticipantIndex: 0,
       matched_title: undefined,
+      participantQueues,
     };
 
-    // Fetch media queue asynchronously
-    const mediaQueue = await getRandomMediaQueue();
+    // Set the first participant's queue as the main queue
+    const firstParticipant = resetParticipants[0];
+    const currentQueue = participantQueues[firstParticipant.id] || [];
 
     set({
       currentSession: newSession,
-      mediaQueue,
+      mediaQueue: currentQueue,
       currentMediaIndex: 0,
       userSwipes: [],
       isMatched: false,
@@ -295,5 +337,83 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   showSessionSummary: () => {
     set({ showSummary: true });
+  },
+
+  continueAfterMatch: () => {
+    const { currentSession, mediaQueue } = get();
+    if (!currentSession) return;
+
+    // Reset participants' completion status for this round
+    const resetParticipants = currentSession.participants.map((p) => ({
+      ...p,
+      hasCompleted: false,
+    }));
+
+    // Remove the matched title from all participant queues
+    const updatedParticipantQueues: Record<string, MediaTitle[]> = {};
+    const matchedTitleId = currentSession.matched_title?.id;
+
+    if (currentSession.participantQueues && matchedTitleId) {
+      for (const [participantId, queue] of Object.entries(
+        currentSession.participantQueues
+      )) {
+        updatedParticipantQueues[participantId] = queue.filter(
+          (media) => media.id !== matchedTitleId
+        );
+      }
+    }
+
+    // Get the first participant's updated queue
+    const firstParticipant = resetParticipants[0];
+    const currentQueue =
+      updatedParticipantQueues[firstParticipant.id] ||
+      mediaQueue.filter((media) => media.id !== matchedTitleId);
+
+    set({
+      currentSession: {
+        ...currentSession,
+        participants: resetParticipants,
+        currentParticipantIndex: 0,
+        matched_title: undefined,
+        status: "swiping",
+        participantQueues: updatedParticipantQueues,
+      },
+      mediaQueue: currentQueue,
+      currentMediaIndex: 0,
+      isMatched: false,
+    });
+  },
+
+  undoMatchAndContinue: () => {
+    const { currentSession, userSwipes } = get();
+    if (!currentSession || !currentSession.matched_title) return;
+
+    // Remove the right swipes for the matched title from all participants
+    const matchedTitleId = currentSession.matched_title.id;
+    const filteredSwipes = userSwipes.filter(
+      (swipe) =>
+        !(
+          swipe.media_title_id === matchedTitleId &&
+          swipe.swipe_direction === "right"
+        )
+    );
+
+    // Reset all participants' completion status except the current one
+    const resetParticipants = currentSession.participants.map((p, index) => ({
+      ...p,
+      hasCompleted: index < currentSession.currentParticipantIndex,
+    }));
+
+    // Continue with the current participant's session
+    set({
+      currentSession: {
+        ...currentSession,
+        participants: resetParticipants,
+        matched_title: undefined,
+        status: "swiping",
+      },
+      userSwipes: filteredSwipes,
+      isMatched: false,
+    });
   },
 }));

@@ -32,6 +32,7 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({
   onStartSession,
 }) => {
   const [participantName, setParticipantName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAddParticipant = () => {
     const name = participantName.trim();
@@ -62,16 +63,19 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({
       `Ready to start with ${participants.length} people? You'll pass the phone around for everyone to swipe.`,
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Start", 
+        {
+          text: "Start",
           onPress: async () => {
+            setIsLoading(true);
             try {
               await onStartSession();
             } catch (error) {
-              console.error('Error starting session:', error);
-              Alert.alert('Error', 'Failed to load content. Please try again.');
+              console.error("Error starting session:", error);
+              Alert.alert("Error", "Failed to load content. Please try again.");
+            } finally {
+              setIsLoading(false);
             }
-          }
+          },
         },
       ]
     );
@@ -137,10 +141,10 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({
       <TouchableOpacity
         style={[
           styles.startButton,
-          participants.length < 2 && styles.disabledButton,
+          (participants.length < 2 || isLoading) && styles.disabledButton,
         ]}
         onPress={handleStartSession}
-        disabled={participants.length < 2}
+        disabled={participants.length < 2 || isLoading}
         accessibilityLabel="Start swiping session"
         accessibilityHint={
           participants.length < 2
@@ -151,10 +155,10 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({
         <Text
           style={[
             styles.startButtonText,
-            participants.length < 2 && styles.disabledButtonText,
+            (participants.length < 2 || isLoading) && styles.disabledButtonText,
           ]}
         >
-          Start Swiping
+          {isLoading ? "Loading..." : "Start Swiping"}
         </Text>
       </TouchableOpacity>
 
