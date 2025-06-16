@@ -1,50 +1,116 @@
-# Welcome to your Expo app 👋
+# Consensus - Swipe to Watch App 🎬
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Like Tinder, but for deciding what to watch! A React Native app built with Expo that helps groups of friends reach consensus on what to watch by swiping through movies and TV shows.
 
-## Get started
+## 🎯 Features
 
-1. Install dependencies
+- **Session-based swiping**: Create or join sessions with friends using simple codes
+- **Tinder-style interface**: Swipe left (nope) or right (like) on shows and movies
+- **Real-time consensus**: When everyone swipes right on the same title, it's a match!
+- **Beautiful animations**: Smooth swipe animations and celebratory match reveals
+- **Randomized queues**: Each user gets a different random order of content
+- **Cross-platform**: Works on iOS, Android, and web via Expo
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (14 or newer)
+- Expo CLI (`npm install -g expo-cli`)
+- Expo Go app on your phone (iOS/Android)
+
+### Installation
+
+1. Clone this repository
+2. Install dependencies:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Start the development server:
 
    ```bash
-   npx expo start
+   npm start
    ```
 
-In the output, you'll find options to open the app in a
+4. Scan the QR code with Expo Go (Android) or Camera app (iOS)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🎮 How to Use
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+1. **Create or Join**: Start a new session or join with a 6-character code
+2. **Share**: Share your session code with friends
+3. **Swipe**: Swipe left (👎) on shows you don't want, right (👍) on shows you'd watch
+4. **Match**: When everyone likes the same show, you get a celebration and reveal!
+5. **Enjoy**: Time to watch your matched content! 🍿
 
-## Get a fresh project
+## 🏗️ Tech Stack
 
-When you're ready, run:
+- **Framework**: React Native with Expo
+- **Language**: TypeScript
+- **State Management**: Zustand
+- **Animations**: React Native Reanimated
+- **Navigation**: Expo Router
+- **Gestures**: React Native Gesture Handler
+- **Backend Ready**: Set up for Supabase integration
 
-```bash
-npm run reset-project
+## 📱 App Structure
+
+```
+app/
+├── (tabs)/
+│   ├── index.tsx          # Main swipe interface
+│   ├── explore.tsx        # How it works guide
+│   └── _layout.tsx        # Tab navigation
+├── _layout.tsx            # Root layout
+components/
+├── SwipeCard.tsx          # Individual swipeable cards
+├── SwipeDeck.tsx          # Stack of cards
+├── MatchAnimation.tsx     # Success animation
+├── SessionCodeInput.tsx   # Session creation/joining
+├── SessionDisplay.tsx     # Session info header
+└── ActionButtons.tsx      # Like/Nope buttons
+store/
+└── appStore.ts           # Zustand state management
+types/
+└── index.ts              # TypeScript definitions
+data/
+└── mockData.ts           # Sample movie/show data
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🔮 Future Features
 
-## Learn more
+- **Real-time sync**: Full Supabase integration for live updates
+- **TMDB Integration**: Real movie/show data and posters
+- **Genre filtering**: Filter by genre, runtime, rating
+- **Streaming service filters**: Filter by Netflix, Disney+, etc.
+- **Session stats**: Fun post-match statistics
+- **Profile system**: Save preferences and history
+- **Push notifications**: Notify when sessions have matches
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🧪 Demo Mode
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Currently runs in demo mode with:
 
-## Join the community
+- Mock movie/show data with placeholder images
+- Simulated real-time behavior
+- Local state management
+- Match triggers after 2+ right swipes (adjustable)
 
-Join our community of developers creating universal apps.
+## 📄 License
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🤝 Contributing
+
+Feel free to submit issues and pull requests! This is a fun project that could use:
+
+- Better animations and transitions
+- More comprehensive movie/show database
+- Real backend integration
+- UI/UX improvements
+- Additional features from the roadmap
+
+---
+
+Made with ❤️ for movie night decisions! No more endless scrolling or arguments about what to watch.

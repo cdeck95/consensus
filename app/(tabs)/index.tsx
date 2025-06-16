@@ -1,75 +1,152 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { ActionButtons } from "@/components/ActionButtons";
+import { MatchAnimation } from "@/components/MatchAnimation";
+import { SessionSetup } from "@/components/SessionSetup";
+import { SessionSummary } from "@/components/SessionSummary";
+import { SwipeDeck } from "@/components/SwipeDeck";
+import { TurnIndicator } from "@/components/TurnIndicator";
+import { useAppStore } from "@/store/appStore";
+import React from "react";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+  const {
+    currentSession,
+    mediaQueue,
+    currentMediaIndex,
+    isMatched,
+    showSummary,
+    userSwipes,
+    addParticipant,
+    removeParticipant,
+    startSession,
+    swipeMedia,
+    nextParticipant,
+    resetApp,
+    getCurrentParticipant,
+    startNewSessionWithSameParticipants,
+    startNewSessionWithNewParticipants,
+  } = useAppStore();
+
+  const handleSwipe = async (mediaId: string, direction: "left" | "right") => {
+    await swipeMedia(mediaId, direction);
+  };
+
+  const handleButtonAction = (direction: "left" | "right") => {
+    const currentMedia = mediaQueue[currentMediaIndex];
+    if (currentMedia) {
+      handleSwipe(currentMedia.id, direction);
+    }
+  };
+
+  const handleMatchAnimationComplete = () => {
+    // Animation completed, summary will be shown automatically via store timer
+  };
+
+  // Show session summary if showSummary state is true
+  if (showSummary && currentSession) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <SessionSummary
+          matchedTitle={currentSession.matched_title}
+          participants={currentSession.participants}
+          swipes={userSwipes}
+          onNewSession={startNewSessionWithNewParticipants}
+          onSameParticipants={startNewSessionWithSameParticipants}
+          onBackToHome={resetApp}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  // Show match animation if there's a match
+  if (isMatched && currentSession?.matched_title && !showSummary) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <MatchAnimation
+          matchedTitle={currentSession.matched_title}
+          onAnimationComplete={handleMatchAnimationComplete}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // Show swiping interface if session is active
+  if (currentSession?.status === "swiping" && mediaQueue.length > 0) {
+    const currentParticipant = getCurrentParticipant();
+    if (!currentParticipant) {
+      return (
+        <SafeAreaView style={styles.container}>
+          <Text>Error: No current participant</Text>
+        </SafeAreaView>
+      );
+    }
+
+    return (
+      <SafeAreaView style={styles.container}>
+        <TurnIndicator
+          currentParticipant={currentParticipant}
+          participantNumber={currentSession.currentParticipantIndex + 1}
+          totalParticipants={currentSession.totalParticipants}
+          onEndTurn={nextParticipant}
+          onResetSession={resetApp}
+        />
+
+        {currentMediaIndex < mediaQueue.length ? (
+          <>
+            <SwipeDeck
+              mediaQueue={mediaQueue}
+              currentIndex={currentMediaIndex}
+              onSwipe={handleSwipe}
+            />
+            <ActionButtons
+              onReject={() => handleButtonAction("left")}
+              onLike={() => handleButtonAction("right")}
+              disabled={false}
+            />
+          </>
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              {currentParticipant.name} has finished swiping!
+              {"\n"}Tap &quot;Done Swiping&quot; to pass to the next person.
+            </Text>
+          </View>
+        )}
+      </SafeAreaView>
+    );
+  }
+
+  // Show setup screen (default state)
+  return (
+    <SafeAreaView style={styles.container}>
+      <SessionSetup
+        participants={currentSession?.participants || []}
+        onAddParticipant={addParticipant}
+        onRemoveParticipant={removeParticipant}
+        onStartSession={startSession}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Math.max(16, SCREEN_WIDTH * 0.04),
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  emptyText: {
+    fontSize: Math.max(16, Math.min(20, SCREEN_WIDTH * 0.045)),
+    color: "#666",
+    textAlign: "center",
+    lineHeight: Math.max(22, SCREEN_WIDTH * 0.055),
   },
 });
