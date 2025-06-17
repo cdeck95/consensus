@@ -2,11 +2,11 @@ import "dotenv/config";
 
 export default {
   expo: {
-    name: "consensus",
+    name: "Consensus",
     slug: "consensus",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/cosensus_logo.png",
     scheme: "consensus",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -15,7 +15,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
+        foregroundImage: "./assets/images/cosensus_logo.png",
         backgroundColor: "#ffffff",
       },
       edgeToEdgeEnabled: true,
@@ -23,14 +23,14 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/favicon.png",
+      favicon: "./assets/images/cosensus_logo.png",
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-icon.png",
+          image: "./assets/images/cosensus_logo.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#ffffff",

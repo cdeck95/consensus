@@ -5,8 +5,8 @@ import { SwipeCard } from "./SwipeCard";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Responsive deck height that adapts to screen size
-const DECK_HEIGHT = Math.min(SCREEN_HEIGHT * 0.75, 650);
+// Responsive deck height that adapts to screen size - optimized for better centering
+const DECK_HEIGHT = Math.min(SCREEN_HEIGHT * 0.65, 600); // Reduced to match card height
 
 interface SwipeDeckProps {
   mediaQueue: MediaTitle[];
@@ -51,11 +51,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: Math.max(10, SCREEN_WIDTH * 0.025),
+    // Remove any top padding/margin that might push cards down
   },
   deck: {
     width: SCREEN_WIDTH * 0.9,
     height: DECK_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
+    // Ensure deck is centered without extra margins
   },
 });

@@ -422,7 +422,8 @@ function seededShuffle<T>(array: T[], seed: string): T[] {
 
 // Get a diverse mix of content with deduplication
 export async function getMixedPopularContent(
-  sessionSeed?: string
+  sessionSeed?: string,
+  previouslyShownIds?: Set<string>
 ): Promise<MediaTitle[]> {
   try {
     const [
@@ -449,7 +450,14 @@ export async function getMixedPopularContent(
     ];
 
     // Remove duplicates
-    const uniqueContent = removeDuplicates(allContent);
+    let uniqueContent = removeDuplicates(allContent);
+
+    // Filter out previously shown media if provided
+    if (previouslyShownIds && previouslyShownIds.size > 0) {
+      uniqueContent = uniqueContent.filter(
+        (media) => !previouslyShownIds.has(media.id)
+      );
+    }
 
     // If we have a session seed, use seeded shuffle for consistent order
     if (sessionSeed) {

@@ -1,3 +1,5 @@
+import { Logo } from "@/components/Logo";
+import { Colors } from "@/constants/Colors";
 import React from "react";
 import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,6 +14,7 @@ export default function ExploreScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <Logo size="medium" style={styles.logo} />
         <Text style={styles.title}>How Consensus Works</Text>
 
         <View style={styles.section}>
@@ -83,12 +86,16 @@ const styles = StyleSheet.create({
     padding: PADDING,
     paddingBottom: Math.max(30, SCREEN_HEIGHT * 0.04),
   },
+  logo: {
+    marginBottom: Math.max(16, SCREEN_HEIGHT * 0.02),
+    alignSelf: "center",
+  },
   title: {
     fontSize: isSmallScreen
       ? 24
       : Math.max(24, Math.min(36, SCREEN_WIDTH * 0.08)),
     fontWeight: "bold",
-    color: "#FF6B6B",
+    color: Colors.brand.primary,
     textAlign: "center",
     marginBottom: Math.max(25, SCREEN_HEIGHT * 0.03),
   },

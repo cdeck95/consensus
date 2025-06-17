@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import React from "react";
 import {
   Dimensions,
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ff4757",
   },
   likeButton: {
-    backgroundColor: "#2ed573",
+    backgroundColor: Colors.brand.primary,
   },
   disabled: {
     opacity: 0.5,

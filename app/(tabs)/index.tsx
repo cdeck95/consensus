@@ -96,6 +96,7 @@ export default function HomeScreen() {
           totalParticipants={currentSession.totalParticipants}
           onEndTurn={nextParticipant}
           onResetSession={resetApp}
+          showEndTurnButton={currentMediaIndex >= mediaQueue.length}
         />
 
         {currentMediaIndex < mediaQueue.length ? (

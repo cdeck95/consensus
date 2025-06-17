@@ -1,3 +1,5 @@
+import { Logo } from "@/components/Logo";
+import { Colors } from "@/constants/Colors";
 import { Participant } from "@/types";
 import React, { useState } from "react";
 import {
@@ -83,6 +85,8 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Logo size="large" style={styles.logo} />
+
       <Text style={styles.title}>Who&apos;s Deciding?</Text>
       <Text style={styles.subtitle}>
         Add everyone who will help choose what to watch
@@ -180,12 +184,16 @@ const styles = StyleSheet.create({
     padding: PADDING,
     paddingBottom: Math.max(40, SCREEN_HEIGHT * 0.05),
   },
+  logo: {
+    marginBottom: Math.max(20, SCREEN_HEIGHT * 0.025),
+    alignSelf: "center",
+  },
   title: {
     fontSize: isSmallScreen
       ? 28
       : Math.max(28, Math.min(36, SCREEN_WIDTH * 0.08)),
     fontWeight: "bold",
-    color: "#FF6B6B",
+    color: Colors.brand.primary,
     textAlign: "center",
     marginBottom: 10,
   },
@@ -286,7 +294,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   startButton: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: Colors.brand.primary,
     paddingVertical: Math.max(12, SCREEN_HEIGHT * 0.018),
     borderRadius: 12,
     alignItems: "center",

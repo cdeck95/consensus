@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { Participant } from "@/types";
 import React from "react";
 import {
@@ -20,6 +21,7 @@ interface TurnIndicatorProps {
   totalParticipants: number;
   onEndTurn: () => void;
   onResetSession: () => void;
+  showEndTurnButton?: boolean;
 }
 
 export const TurnIndicator: React.FC<TurnIndicatorProps> = ({
@@ -28,6 +30,7 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({
   totalParticipants,
   onEndTurn,
   onResetSession,
+  showEndTurnButton = true,
 }) => {
   return (
     <View style={styles.container}>
@@ -50,21 +53,23 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        style={styles.endTurnButton}
-        onPress={onEndTurn}
-        accessibilityLabel="End turn"
-        accessibilityHint="Pass the phone to the next person"
-      >
-        <Text style={styles.endTurnButtonText}>
-          Done Swiping - Pass to Next Person
-        </Text>
-      </TouchableOpacity>
+      {showEndTurnButton && (
+        <TouchableOpacity
+          style={styles.endTurnButton}
+          onPress={onEndTurn}
+          accessibilityLabel="End turn"
+          accessibilityHint="Pass the phone to the next person"
+        >
+          <Text style={styles.endTurnButtonText}>
+            Done Swiping - Pass to Next Person
+          </Text>
+        </TouchableOpacity>
+      )}
 
       <Text style={styles.instructions}>
-        Swipe right on shows you&apos;d want to watch, left on ones you
-        don&apos;t. When you&apos;re done, tap the button above to pass the
-        phone.
+        {showEndTurnButton
+          ? "You've finished all cards! Tap the button above to pass the phone."
+          : "Swipe right on shows you'd want to watch, left on ones you don't."}
       </Text>
     </View>
   );
@@ -73,7 +78,8 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    padding: PADDING,
+    paddingHorizontal: PADDING,
+    paddingVertical: Math.max(8, SCREEN_HEIGHT * 0.01), // Reduced from PADDING
     borderBottomWidth: 1,
     borderBottomColor: "#e1e5e9",
     shadowColor: "#000",
@@ -86,7 +92,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: Math.max(12, SCREEN_HEIGHT * 0.015),
+    marginBottom: Math.max(8, SCREEN_HEIGHT * 0.01), // Reduced margin
   },
   turnInfo: {
     flex: 1,
@@ -94,15 +100,15 @@ const styles = StyleSheet.create({
   turnLabel: {
     fontSize: Math.max(12, Math.min(16, SCREEN_WIDTH * 0.035)),
     color: "#666",
-    marginBottom: 2,
+    marginBottom: 1, // Reduced margin
   },
   participantName: {
     fontSize: isSmallScreen
-      ? 20
-      : Math.max(20, Math.min(28, SCREEN_WIDTH * 0.065)),
+      ? 18 // Reduced from 20
+      : Math.max(18, Math.min(24, SCREEN_WIDTH * 0.055)), // Reduced font size
     fontWeight: "bold",
-    color: "#FF6B6B",
-    marginBottom: 2,
+    color: Colors.brand.primary,
+    marginBottom: 1, // Reduced margin
   },
   progress: {
     fontSize: Math.max(10, Math.min(14, SCREEN_WIDTH * 0.03)),
@@ -124,25 +130,25 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   endTurnButton: {
-    backgroundColor: "#4ECDC4",
-    paddingVertical: Math.max(10, SCREEN_HEIGHT * 0.015),
+    backgroundColor: Colors.brand.primary,
+    paddingVertical: Math.max(8, SCREEN_HEIGHT * 0.01), // Reduced padding
     paddingHorizontal: Math.max(16, SCREEN_WIDTH * 0.04),
     borderRadius: 10,
     alignItems: "center",
-    marginBottom: Math.max(8, SCREEN_HEIGHT * 0.01),
-    minHeight: 48, // Accessibility
+    marginBottom: Math.max(6, SCREEN_HEIGHT * 0.008), // Reduced margin
+    minHeight: 44, // Reduced from 48 for accessibility
   },
   endTurnButtonText: {
     color: "#fff",
-    fontSize: Math.max(14, Math.min(18, SCREEN_WIDTH * 0.04)),
+    fontSize: Math.max(14, Math.min(16, SCREEN_WIDTH * 0.035)), // Reduced font size
     fontWeight: "600",
     textAlign: "center",
   },
   instructions: {
-    fontSize: Math.max(12, Math.min(16, SCREEN_WIDTH * 0.035)),
+    fontSize: Math.max(11, Math.min(14, SCREEN_WIDTH * 0.03)), // Reduced font size
     color: "#666",
     textAlign: "center",
-    lineHeight: Math.max(16, SCREEN_WIDTH * 0.04),
+    lineHeight: Math.max(14, SCREEN_WIDTH * 0.035), // Reduced line height
     paddingHorizontal: Math.max(8, SCREEN_WIDTH * 0.02),
   },
 });

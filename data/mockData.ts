@@ -115,7 +115,7 @@ export const mockMediaTitles: MediaTitle[] = [
 ];
 
 // Seeded random shuffle for consistent ordering per session
-function seededShuffle<T>(array: T[], seed: string): T[] {
+export function seededShuffle<T>(array: T[], seed: string): T[] {
   const shuffled = [...array];
   let hash = 0;
 
@@ -147,13 +147,17 @@ export function shuffleArray<T>(array: T[]): T[] {
 
 // Get random media queue with API data if available, fallback to mock data
 export async function getRandomMediaQueue(
-  sessionSeed?: string
+  sessionSeed?: string,
+  previouslyShownIds?: Set<string>
 ): Promise<MediaTitle[]> {
   try {
     // Check if API key is configured
     if (isApiKeyConfigured()) {
       console.log("Using TMDB API for media data...");
-      const apiData = await getMixedPopularContent(sessionSeed);
+      const apiData = await getMixedPopularContent(
+        sessionSeed,
+        previouslyShownIds
+      );
 
       if (apiData.length > 0) {
         return apiData; // Already shuffled in getMixedPopularContent
@@ -170,11 +174,20 @@ export async function getRandomMediaQueue(
   }
 
   // Fallback to mock data with seeded shuffle if provided
-  if (sessionSeed) {
-    return seededShuffle(mockMediaTitles, sessionSeed);
+  let filteredData = mockMediaTitles;
+
+  // Filter out previously shown media if provided
+  if (previouslyShownIds && previouslyShownIds.size > 0) {
+    filteredData = mockMediaTitles.filter(
+      (media) => !previouslyShownIds.has(media.id)
+    );
   }
 
-  return shuffleArray(mockMediaTitles);
+  if (sessionSeed) {
+    return seededShuffle(filteredData, sessionSeed);
+  }
+
+  return shuffleArray(filteredData);
 }
 
 // Synchronous version for backward compatibility (returns mock data)

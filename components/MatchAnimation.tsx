@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { MediaTitle } from "@/types";
 import React, { useEffect, useState } from "react";
 import {
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
   },
   celebrationText: {
     fontSize: Math.max(14, Math.min(20, SCREEN_WIDTH * 0.045)),
-    color: "#4ECDC4",
+    color: Colors.brand.primary,
     textAlign: "center",
     fontWeight: "600",
     lineHeight: Math.max(20, SCREEN_WIDTH * 0.05),
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   keepGoingButton: {
-    backgroundColor: "#4ECDC4",
+    backgroundColor: Colors.brand.primary,
     paddingVertical: Math.max(10, SCREEN_HEIGHT * 0.012),
     paddingHorizontal: Math.max(16, SCREEN_WIDTH * 0.04),
     borderRadius: 25,

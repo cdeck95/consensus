@@ -42,4 +42,11 @@ export interface AppState {
   userSwipes: UserSwipe[];
   isMatched: boolean;
   showSummary: boolean;
+  sessionHistory: SessionHistory[];
+}
+
+export interface SessionHistory {
+  sessionId: string;
+  shownMediaIds: string[];
+  createdAt: string;
 }

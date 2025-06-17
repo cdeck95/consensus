@@ -18,9 +18,9 @@ import Animated, {
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 
-// Responsive card dimensions based on screen size
+// Responsive card dimensions based on screen size - optimized for better centering
 const CARD_WIDTH = SCREEN_WIDTH * 0.9;
-const CARD_HEIGHT = Math.min(SCREEN_HEIGHT * 0.75, 650); // Max 650px, but responsive
+const CARD_HEIGHT = Math.min(SCREEN_HEIGHT * 0.65, 600); // Reduced from 0.75 to give more room
 const POSTER_HEIGHT_RATIO = 0.7;
 
 interface SwipeCardProps {
