@@ -5,8 +5,15 @@ import { SessionSummary } from "@/components/SessionSummary";
 import { SwipeDeck } from "@/components/SwipeDeck";
 import { TurnIndicator } from "@/components/TurnIndicator";
 import { useAppStore } from "@/store/appStore";
+import { router } from "expo-router";
 import React from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -47,6 +54,11 @@ export default function HomeScreen() {
     // Animation completed, summary will be shown automatically via store timer
   };
 
+  const handleBackToTopics = () => {
+    resetApp(); // Reset the app state
+    router.back(); // Navigate back to topic selection
+  };
+
   // Show session summary if showSummary state is true
   if (showSummary && currentSession) {
     return (
@@ -57,7 +69,7 @@ export default function HomeScreen() {
           swipes={userSwipes}
           onNewSession={startNewSessionWithNewParticipants}
           onSameParticipants={startNewSessionWithSameParticipants}
-          onBackToHome={resetApp}
+          onBackToHome={handleBackToTopics}
         />
       </SafeAreaView>
     );
@@ -95,7 +107,7 @@ export default function HomeScreen() {
           participantNumber={currentSession.currentParticipantIndex + 1}
           totalParticipants={currentSession.totalParticipants}
           onEndTurn={nextParticipant}
-          onResetSession={resetApp}
+          onResetSession={handleBackToTopics}
           showEndTurnButton={currentMediaIndex >= mediaQueue.length}
         />
 
@@ -127,6 +139,14 @@ export default function HomeScreen() {
   // Show setup screen (default state)
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={handleBackToTopics}
+        >
+          <Text style={styles.backButtonText}>← Back to Topics</Text>
+        </TouchableOpacity>
+      </View>
       <SessionSetup
         participants={currentSession?.participants || []}
         onAddParticipant={addParticipant}
@@ -141,6 +161,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
+  },
+  header: {
+    paddingHorizontal: Math.max(16, SCREEN_WIDTH * 0.04),
+    paddingVertical: Math.max(12, SCREEN_WIDTH * 0.03),
+    alignItems: "flex-start",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "transparent",
+  },
+  backButtonText: {
+    fontSize: Math.max(16, Math.min(18, SCREEN_WIDTH * 0.045)),
+    color: "#007AFF",
+    fontWeight: "600",
   },
   emptyContainer: {
     flex: 1,

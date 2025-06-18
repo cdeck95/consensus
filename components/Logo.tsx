@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 
 interface LogoProps {
   size?: "small" | "medium" | "large";
@@ -14,9 +14,9 @@ export const Logo: React.FC<LogoProps> = ({
   style,
 }) => {
   const logoSize = {
-    small: 40,
-    medium: 60,
-    large: 80,
+    small: 60,
+    medium: 100,
+    large: 160,
   }[size];
 
   const fontSize = {
@@ -38,7 +38,7 @@ export const Logo: React.FC<LogoProps> = ({
         ]}
         resizeMode="contain"
       />
-      {showText && <Text style={[styles.text, { fontSize }]}>CONSENSUS</Text>}
+      {/* {showText && <Text style={[styles.text, { fontSize }]}>CONSENSUS</Text>} */}
     </View>
   );
 };
